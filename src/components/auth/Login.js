@@ -1,11 +1,17 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { getNodeText } from '@testing-library/dom';
+import { useContext, useState } from 'react';
+import axios from '../../config/axios';
+import { useHistory } from 'react-router-dom';
+import localStorageService from '../../services/localStorageService';
+import { AuthContext } from '../../contexts/AuthContextProvider';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState({});
+
+  const { setIsAuthenticated } = useContext(AuthContext);
+
+  const history = useHistory();
 
   const validateInput = () => {
     const newError = {};
@@ -18,7 +24,10 @@ function Login() {
     try {
       e.preventDefault();
       validateInput();
-      await axios.post('http://localhost:8000/login', { email, password });
+      const res = await axios.post('/login', { email, password });
+      localStorageService.setToken(res.data.token);
+      setIsAuthenticated(true);
+      history.push('/');
     } catch (err) {
       console.dir(err);
     }

@@ -1,6 +1,44 @@
+import { useEffect, useState } from 'react';
 import Header from '../components/layout/Header';
+import axios from '../config/axios';
+import localStorageService from '../services/localStorageService';
 
 function Home() {
+  const [requestFriends, setRequestFriends] = useState([]);
+  useEffect(() => {
+    const fetchRequestList = async () => {
+      try {
+        const res = await axios.get('/friends/request-list', {
+          headers: {
+            authorization: `Bearer ${localStorageService.getToken()}`
+          }
+        });
+        setRequestFriends(res.data.friends);
+      } catch (err) {}
+    };
+
+    fetchRequestList();
+  }, []);
+
+  const handleAcceptFriend = async (e, id) => {
+    e.preventDefault();
+    try {
+      const res = await axios.patch(
+        `/friends/${id}`,
+        { status: 'FRIEND' },
+        {
+          headers: {
+            authorization: `Bearer ${localStorageService.getToken()}`
+          }
+        }
+      );
+      const newRequestList = requestFriends.filter(el => id !== el.id);
+      setRequestFriends(newRequestList);
+    } catch {}
+  };
+
+  const handleRejectFriend = id => {};
+
   return (
     <>
       <Header />
@@ -18,7 +56,18 @@ function Home() {
               <div className="panel-body">
                 <h4>คำขอเป็นเพื่อน</h4>
                 <ul>
-                  <li>
+                  {requestFriends.map(el => (
+                    <li key={el.id}>
+                      <a href="/">{`${el.firstName} ${el.lastName}`}</a>
+                      <a className="text-success" href="/" onClick={e => handleAcceptFriend(e, el.id)}>
+                        [รับ]
+                      </a>
+                      <a className="text-danger" href="/" onClick={() => handleRejectFriend(el.id)}>
+                        [ปฏิเสธ]
+                      </a>
+                    </li>
+                  ))}
+                  {/* <li>
                     <a href="/">John Doe</a>
                     <a className="text-success" href="/">
                       [รับ]
@@ -26,7 +75,7 @@ function Home() {
                     <a className="text-danger" href="/">
                       [ปฏิเสธ]
                     </a>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
             </div>

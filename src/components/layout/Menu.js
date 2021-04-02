@@ -1,14 +1,32 @@
+import { useContext } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContextProvider';
+import localStorageService from '../../services/localStorageService';
+
 function Menu() {
+  const history = useHistory();
+
+  const { setIsAuthenticated } = useContext(AuthContext);
+
+  const handleLogout = e => {
+    e.preventDefault();
+    localStorageService.clearToken();
+    setIsAuthenticated(false);
+    history.push('/');
+  };
+
   return (
     <ul className="nav navbar-nav navbar-right">
       <li>
-        <a href="/">Home</a>
+        <Link to="/">Home</Link>
       </li>
       <li>
-        <a href="/profile">Profile</a>
+        <Link to="/profile">Profile</Link>
       </li>
       <li>
-        <a href="/">Logout</a>
+        <a href="/" onClick={handleLogout}>
+          Logout
+        </a>
       </li>
     </ul>
   );

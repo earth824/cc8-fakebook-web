@@ -1,9 +1,11 @@
+import { Link } from 'react-router-dom';
+
 function Logo() {
   return (
     <div className="navbar-header">
-      <a className="navbar-brand" href="/">
+      <Link className="navbar-brand" to="/">
         Fakebuck
-      </a>
+      </Link>
     </div>
   );
 }
