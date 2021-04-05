@@ -17,8 +17,6 @@ function Home() {
             <RequestFriend />
           </div>
           <div className="col-md-6">
-            <AddPost />
-            <hr />
             <PostList />
           </div>
           <div className="col-md-3">

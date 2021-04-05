@@ -1,16 +1,35 @@
-function Post() {
+import axios from 'axios';
+import { useContext } from 'react';
+import { AuthContext } from '../../contexts/AuthContextProvider';
+
+function Post({ text, id, createdAt, User: { id: userId, firstName, lastName }, setTriggerDelete }) {
+  const { user } = useContext(AuthContext);
+
+  const handleDeletePost = async postId => {
+    try {
+      await axios.delete(`/posts/${postId}`);
+      setTriggerDelete(prev => !prev);
+
+      // setPosts(prevPost => prevPost.filter(item => item.id !== postId));
+    } catch (err) {}
+  };
+
   return (
     <div className="panel panel-default">
       <div className="panel-body">
-        <p>สวัสดีทุกคน มาเขียนโค็ดกัน โค็ดดิ้งสนุกจริงๆนะ !!!</p>
+        <p>{text}</p>
       </div>
       <div className="panel-footer">
-        <span>posted 2021-1-27 20:45:01 by Jame Doe</span>
-        <span className="pull-right">
-          <a className="text-danger" href="/">
-            [ลบ]
-          </a>
+        <span>
+          posted {createdAt} by {firstName} {lastName}
         </span>
+        {user.id === userId && (
+          <span className="pull-right">
+            <button className="text-danger" onClick={() => handleDeletePost(id)}>
+              [ลบ]
+            </button>
+          </span>
+        )}
       </div>
     </div>
   );

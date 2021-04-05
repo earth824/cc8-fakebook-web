@@ -1,17 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router';
 import axios from '../../config/axios';
+import { AuthContext } from '../../contexts/AuthContextProvider';
 import localStorageService from '../../services/localStorageService';
 
 function RequestFriend() {
   const [requestFriends, setRequestFriends] = useState([]);
+  const history = useHistory();
+
+  const { setIsAuthenticated } = useContext(AuthContext);
   useEffect(() => {
     const fetchRequestList = async () => {
       try {
-        const res = await axios.get('/friends/request-list', {
-          headers: {
-            authorization: `Bearer ${localStorageService.getToken()}`
-          }
-        });
+        const res = await axios.get('/friends/request-list');
         setRequestFriends(res.data.friends);
       } catch (err) {}
     };
@@ -22,18 +23,16 @@ function RequestFriend() {
   const handleAcceptFriend = async (e, id) => {
     e.preventDefault();
     try {
-      await axios.patch(
-        `/friends/${id}`,
-        { status: 'FRIEND' },
-        {
-          headers: {
-            authorization: `Bearer ${localStorageService.getToken()}`
-          }
-        }
-      );
+      await axios.patch(`/friends/${id}`, { status: 'FRIEND' });
       const newRequestList = requestFriends.filter(el => id !== el.id);
       setRequestFriends(newRequestList);
-    } catch {}
+    } catch (err) {
+      if (err.response.status === 401) {
+        localStorageService.clearToken();
+        setIsAuthenticated(false);
+        history.push('/');
+      }
+    }
   };
 
   const handleRejectFriend = id => {};
